@@ -1,0 +1,113 @@
+/* Обнуление стилей */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column; /* Размещаем элементы вертикально */
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    text-align: center;
+    background: url("cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAzL3JtNjA2ZGVzaWduLXJlbWl4LWJnLTEzLWEuanBn.webp") no-repeat center center/cover;
+}
+
+/* Заголовок */
+h1 {
+    font-size: 3em;
+    font-family: "header", sans-serif;
+    color: white;
+    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
+    margin-bottom: 20px;
+}
+
+/* Контейнер для сердец */
+.hearts {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* Расстояние между сердцами */
+    width: 100%;
+}
+
+/* Сердца */
+.heart {
+    width: 100px;
+    height: 100px;
+    background-color: red;
+    position: relative;
+    transform: rotate(-45deg);
+    animation: pulse 1s infinite ease-in-out, glow 1.5s infinite ease-in-out;
+}
+
+/* Части сердца */
+.heart::before,
+.heart::after {
+    content: "";
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-color: red;
+    border-radius: 50%;
+}
+
+.heart::before {
+    top: -50px;
+    left: 0;
+}
+
+.heart::after {
+    top: 0;
+    left: 50px;
+}
+
+/* Анимации */
+@keyframes pulse {
+    0% { transform: scale(1) rotate(-45deg); }
+    50% { transform: scale(1.2) rotate(-45deg); }
+    100% { transform: scale(1) rotate(-45deg); }
+}
+
+@keyframes glow {
+    0% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.6); }
+    50% { box-shadow: 0 0 30px rgba(255, 0, 0, 1); }
+    100% { box-shadow: 0 0 10px rgba(255, 0, 0, 0.6); }
+}
+
+/* Шрифт для заголовка */
+@font-face {
+    font-family: "header";
+    src:
+        url("../fonts/leaguescript-webfont.woff2") format("woff2"),
+        url("../fonts/leaguescript-webfont.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2em;
+    }
+
+    .heart {
+        width: 70px;
+        height: 70px;
+    }
+
+    .heart::before, .heart::after {
+        width: 70px;
+        height: 70px;
+    }
+
+    .heart::before {
+        top: -35px;
+    }
+
+    .heart::after {
+        left: 35px;
+    }
+}

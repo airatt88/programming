@@ -1,0 +1,96 @@
+@font-face {
+    font-family: "header";
+    src:
+    url("../fonts/leaguescript-webfont.woff2") format("woff2"),
+    url("../fonts/leaguescript-webfont.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "text";
+    src:
+    url("../fonts/alexbrush-regular-webfont.woff2") format("woff2"),
+    url("../fonts/alexbrush-regular-webfont.woff") format("woff");
+    font-weight: normal;
+    font-style: normal;
+}
+
+@keyframes border-glow {
+    0% { border-color: pink; }
+    50% { border-color: hotpink; }
+    100% { border-color: pink; }
+}
+
+body {
+    background: url(cHJpdmF0ZS9sci9pbWFnZXMvd2Vic2l0ZS8yMDIzLTAzL3JtNjA2ZGVzaWduLXJlbWl4LWJnLTEzLWEuanBn.webp) no-repeat center center/cover;
+    border: 5px solid pink;
+    padding: 20px;
+    animation: border-glow 2s infinite alternate ;
+}
+
+header {
+    text-align: center;
+    background: url("") no-repeat center center;
+    background-size: cover;
+    border-bottom: 5px dotted plum ;
+    font: 
+    5em "header",
+    sans-serif;
+}
+
+h1 {
+    font: 40px "text", sans-serif;
+}
+
+.song {
+    column-count: 2;
+    column-gap: 40px;
+    text-align: justify;
+    font: 
+    27px "text", sans-serif;
+}
+
+button {
+    background-color: palevioletred;
+    border: 2px solid rgb(80, 56, 68);
+}
+
+nav {
+    margin: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font: 25px "text", sans-serif;
+}
+
+nav a {
+    background: url("корги.png") no-repeat center center/cover;
+    border: 2px solid rgb(80, 56, 68);
+    text-align: center;
+    text-decoration: none;
+    color: black;
+    padding: 10px;
+    margin: 0px 15px;
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    nav {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    nav a {
+        margin: 5px 0;
+    }
+}
+
+ul {
+    list-style-type: none;
+}
+
+li::before {
+    content: "💜";
+    margin: 2px
+}
