@@ -89,8 +89,9 @@ a {
     }
 
     #level-txt {
-        font-size: medium;
-        overflow-wrap: break-word;
+        font-size: 13px;
+        align-self: center;
+        justify-self: center;
     }
 
     #game-info {
