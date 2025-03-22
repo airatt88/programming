@@ -90,6 +90,7 @@ a {
 
     #level-txt {
         font-size: medium;
+        overflow-wrap: break-word;
     }
 
     #game-info {
