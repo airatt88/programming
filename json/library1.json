@@ -1,0 +1,36 @@
+{
+  "libraryName": "City Central Library",
+  "location": "Main Street 123",
+  "established": 1950,
+  "isOpen": true,
+  "books": [
+    {
+      "title": "The Great Gatsby",
+      "author": "F. Scott Fitzgerald",
+      "year": 1925,
+      "genres": ["Classic", "Novel"],
+      "availableCopies": 3
+    },
+    {
+      "title": "To Kill a Mockingbird",
+      "author": "Harper Lee",
+      "year": 1960,
+      "genres": ["Classic", "Drama"],
+      "availableCopies": 0
+    },
+    {
+      "title": "1984",
+      "author": "George Orwell",
+      "year": 1949,
+      "genres": ["Dystopian", "Political Fiction"],
+      "availableCopies": 5
+    },
+    {
+      "title": "The Hobbit",
+      "author": "J.R.R. Tolkien",
+      "year": 1937,
+      "genres": ["Fantasy", "Adventure"],
+      "availableCopies": 2
+    }
+  ]
+}
