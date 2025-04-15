@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Игра Запомни и Найди</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden; /* Предотвращаем прокрутку */
+            background: linear-gradient(to bottom right, #87CEFA, #FFB6C1); /* Градиентный фон */
+        }
+
+        #overlay {
+            position: absolute; /* Позиционируем блок поверх фона */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.9); /* Прозрачный белый фон для текста */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5; /* Блок выше фона */
+        }
+
+        #startScreen, #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 10; /* Блок выше фона */
+        }
+
+        h1, h2, h3, h4 {
+            margin-bottom: 10px;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #gameContainer {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #cards {
+            display: grid;
+            gap: 10px;
+            margin: 20px;
+        }
+
+        .card {
+            position: relative;
+            background-color: transparent;
+            overflow: hidden;
+            background-color: hsl(211, 100%, 50%);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            cursor: pointer;
+            user-select: none;
+            border-radius: 8px;
+            height: 100px;
+            width: 100px;
+            transition: background-color 0.3s ease;
+            perspective: 1000px;
+            
+        }
+        .card-inner {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            transform-style: preserve-3d;
+            transition: transform 0.5s;
+        }
+
+        .card-front, .card-back {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            border-radius: 8px;
+        }
+
+        .card-back {
+            transform: rotateY(180deg);
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched .card-front,
+        .card.matched .card-back {
+            background-color: hsl(134, 61%, 41%);
+            cursor: default;
+        }
+
+        .card.mismatched .card-front,
+        .card.mismatched .card-back {
+            background-color: red;
+        }
+
+        #resetButton {
+            margin-top: 20px;
+            padding: 10px 30px;
+            font-size: 18px;
+            background-color: hsl(134, 61%, 41%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            display: none;
+        }
+
+        #resetButton:hover {
+            background-color: #218838;
+        }
+
+        #rules {
+            max-width: 300px;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-left: 20px;
+            text-align: left;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="overlay">
+        <div id="startScreen">
+            <h1>Игра Запомни и Найди</h1>
+
+            <h2>Проект подготовил: Муртазаев Айрат</h2> 
+            <h4>Выберите уровень сложности:</h4>
+            <div class="buttonContainer">
+                <button id="easyButton">Легкий уровень</button>
+                <button id="hardButton">Сложный уровень</button>
+            </div>
+            <div id="rules">
+                <h3>Правила игры:</h3>
+                <p>1. У вас есть 30 карточек, некоторые из которых совпадают.</p>
+                <p>2. Найдите все пары карточек с физическими и математическими формулами, открывая их по одной.</p>
+                <p>3. Если формулы совпадают, они останутся открытыми.</p>
+                <p>4. Если нет, они закроются через секунду.</p>
+                <p>5. Игра заканчивается, когда вы найдёте все пары!</p>
+            </div>
+        </div>
+
+        <div id="gameContainer" style="display: none;">
+            <h1>Игра Запомни и Найди</h1>
+            <div id="cards"></div>
+            <button id="resetButton" style="display: none;">Начать заново</button>
+        </div>
+    </div>
+
+    <script>
+        let pairs = [];
+        let flippedCards = [];
+        let matchedCardsCount = 0;
+
+        const cardsContainer = document.getElementById("cards");
+        const resetButton = document.getElementById("resetButton");
+        const gameContainer = document.getElementById("gameContainer");
+        const startScreen = document.getElementById("startScreen");
+        const easyButton = document.getElementById("easyButton");
+        const hardButton = document.getElementById("hardButton");
+
+        // Легкий уровень (8 пар)
+        const easyPairs = [
+            { country: "F = ", capital: "mg" },
+            { country: "Eк = ", capital: "mv²/2" },
+            { country: "S = ", capital: "vt" },
+            { country: "Eп = ", capital: "mgh" },
+            { country: "(a+b)² = ", capital: "a²+2ab+b²" },
+            { country: "c² = ", capital: "a²+b²" },
+            { country: "aₙ = ", capital: "a₁+d(n-1)" },
+            { country: "S□ =", capital: "a²" }
+        ];
+
+        // Сложный уровень (12 пар)
+        const hardPairs = [
+            { country: "F = ", capital: "mg" },
+            { country: "Eк = ", capital: "mv²/2" },
+            { country: "S = ", capital: "vt" },
+            { country: "Eп = ", capital: "mgh" },
+            { country: "(a+b)² = ", capital: "a²+2ab+b²" },
+            { country: "c² = ", capital: "a²+b²" },
+            { country: "aₙ = ", capital: "a₁+d(n-1)" },
+            { country: "D = ", capital: "b²-4ac" },
+            { country: "S○ = ", capital: "πr²" },
+            { country: "Q = ", capital: "cm(t1-t2)" },
+            { country: "k = ", capital: "F/Δl" },
+            { country: "I = ", capital: "q/t" }
+        ];
+
+        easyButton.addEventListener("click", () => initGame(easyPairs, 4)); // 4 колонки при легком уровне
+        hardButton.addEventListener("click", () => initGame(hardPairs, 6)); // 6 колонок при сложном уровне
+
+        function initGame(levelPairs, columns) {
+            pairs = levelPairs; // Устанавливаем текущие пары в зависимости от уровня
+            cardsContainer.innerHTML = ''; 
+            flippedCards = []; 
+            matchedCardsCount = 0;
+
+            cardsContainer.style.gridTemplateColumns = `repeat(${columns}, 100px)`; // Устанавливаем колонки
+
+            const shuffledPairs = shuffle(createCardsArray(pairs));
+
+            shuffledPairs.forEach(item => {
+                const card = document.createElement("div");
+                card.classList.add("card");
+                card.dataset.value = item.value;
+                card.dataset.type = item.type;
+                card.innerText = "";
+
+                const cardInner = document.createElement("div");
+                cardInner.classList.add("card-inner");
+
+                const cardFront = document.createElement("div");
+                cardFront.classList.add("card-front");
+                cardFront.innerText = "";
+
+                const cardBack = document.createElement("div");
+                cardBack.classList.add("card-back");
+                cardBack.innerText = item.value;
+
+                cardInner.appendChild(cardFront);
+                cardInner.appendChild(cardBack);
+                card.appendChild(cardInner);
+
+                card.addEventListener("click", flipCard);
+                cardsContainer.appendChild(card);
+            });
+
+            gameContainer.style.display = 'flex';
+            startScreen.style.display = 'none';
+            resetButton.style.display = 'block';
+        }
+
+        function createCardsArray(pairs) {
+            return pairs.flatMap(pair => [
+                { value: pair.country, type: 'country' },
+                { value: pair.capital, type: 'capital' }
+            ]);
+        }
+
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function flipCard(e) {
+            const clickedCard = e.currentTarget;
+
+            if (!clickedCard.classList.contains("flipped") && flippedCards.length < 2) {
+                clickedCard.classList.add("flipped");
+                flippedCards.push(clickedCard);
+
+                if (flippedCards.length === 2) {
+                    checkForMatch(); 
+                }
+            }
+        }
+
+        function checkForMatch() {
+            const [firstCard, secondCard] = flippedCards;
+
+            const isMatch = (firstCard.dataset.type === 'country' && secondCard.dataset.type === 'capital' && 
+                             firstCard.dataset.value === pairs.find(pair => pair.capital === secondCard.dataset.value)?.country) ||
+                            (firstCard.dataset.type === 'capital' && secondCard.dataset.type === 'country' && 
+                             firstCard.dataset.value === pairs.find(pair => pair.capital === firstCard.dataset.value)?.country);
+
+            if (isMatch) {
+                firstCard.classList.add("matched");
+                secondCard.classList.add("matched");
+                matchedCardsCount += 2;
+
+                if (matchedCardsCount === (pairs.length * 2)) { // Проверка на завершение игры
+                    setTimeout(() => {
+                        alert("Ты справился с заданием!");
+                        resetGame();
+                    }, 500);
+                }
+            } else {
+                firstCard.classList.add("mismatched");
+                secondCard.classList.add("mismatched");
+
+                setTimeout(() => {
+                    firstCard.classList.remove("mismatched", "flipped");
+                    secondCard.classList.remove("mismatched", "flipped");
+                }, 1000);
+            }
+
+            flippedCards = []; // Очищаем массив
+        }
+
+        resetButton.addEventListener("click", resetGame);
+
+        function resetGame() {
+            gameContainer.style.display = 'none'; 
+            startScreen.style.display = 'flex'; 
+            resetButton.style.display = 'none'; 
+        }
+    </script>
+</body>
+
+</html>
