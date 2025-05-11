@@ -5,4 +5,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '/programming/tenzies-dice-game/',
   plugins: [react()],
+  build: {
+    outDir: 'dist',
+  },
 })
