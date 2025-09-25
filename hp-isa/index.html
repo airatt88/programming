@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Happy Birthday — Isabel!!</title>
+  <style>
+    :root{
+      --spotify-green: #1DB954;
+      --spotify-dark: #191414;
+      --white: #fff;
+      --shadow: 0 6px 18px rgba(0,0,0,0.6);
+    }
+
+    html,body{
+      height:100%;
+      margin:0;
+      font-family: Arial, Helvetica, sans-serif;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+    }
+
+    body{
+      background: url("hp-pic.png") no-repeat center center/cover;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      color:var(--white);
+      text-shadow:0 2px 8px rgba(0,0,0,0.8);
+      overflow:hidden;
+    }
+    
+    /* Блок контролов закреплён внизу, центрирован по горизонтали */
+    .controls {
+      position: fixed;
+      left: 50%;
+      transform: translateX(-50%);
+      bottom: 20px; /* кнопка "Full text" будет 20px от низа, так и просили */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: min(520px, 92%);
+      padding: 8px 12px;
+      pointer-events: auto;
+      z-index: 50;
+    }
+
+    /* Play button */
+    .play-btn {
+      background: var(--spotify-green);
+      border: none;
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 34px;
+      color: var(--white);
+      cursor: pointer;
+      box-shadow: var(--shadow);
+      transition: transform .12s ease;
+    }
+    .play-btn:active { transform: scale(.96); }
+    .play-btn:hover { transform: scale(1.06); }
+
+    /* Обёртка прогресс-бара */
+    .progress-wrap {
+      width: 100%;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      justify-content: center;
+    }
+
+    /* Время (текущее / длительность) */
+    .time {
+      font-size: 13px;
+      color: rgba(255,255,255,0.95);
+      min-width:48px;
+      text-align:center;
+      user-select:none;
+    }
+
+    /* Бар трека */
+    .progress {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 8px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.5) inset;
+    }
+
+    /* Заполненная часть (визуал) — рисуем псевдоэлемент через фоновый градиент */
+    .progress::before{
+      content: "";
+      position:absolute;
+      left:0;
+      top:0;
+      bottom:0;
+      width:0%;
+      border-radius:999px;
+      background: linear-gradient(90deg, var(--spotify-green), #4BE07A 80%);
+      box-shadow: 0 4px 10px rgba(29,185,84,0.35);
+      transition: width .05s linear;
+    }
+
+    /* Круглый ползунок */
+    .progress-handle {
+      position: absolute;
+      top: 50%;
+      transform: translate(-50%,-50%);
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--white);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      pointer-events: none; /* управление через JS */
+    }
+
+    /* Кнопка "Full text" (внизу) */
+    .full-text-btn {
+      background-color: var(--spotify-dark);
+      border: 2px solid var(--spotify-green);
+      border-radius: 999px;
+      padding: 10px 28px;
+      color: white;
+      font-size: 16px;
+      text-decoration: none;
+      display: inline-block;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+      transition: background .15s ease, transform .12s ease;
+      z-index:60;
+    }
+    .full-text-btn:hover {
+      background: var(--spotify-green);
+      transform: translateY(-3px);
+    }
+
+    /* Адаптив мелкий экран */
+    @media (max-width:420px){
+      .play-btn { width:72px; height:72px; font-size:26px; }
+      .progress { height:7px; }
+      .time { font-size:12px; min-width:40px; }
+      .full-text-btn { padding:8px 20px; font-size:14px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Скрытый аудио элемент. Путь к файлу: положи mp3 рядом с этим HTML -->
+  <audio id="audio" preload="metadata" src="Black-Roses-for-Isabel.mp3"></audio>
+
+  <!-- Контролы (фиксированы снизу) -->
+  <div class="controls" aria-hidden="false">
+    <button class="play-btn" id="playBtn" aria-label="Play">▶</button>
+
+    <div class="progress-wrap" aria-hidden="false" style="position:relative;">
+      <div class="time" id="currentTime">0:00</div>
+
+      <!-- Прогресс как див: мы будем реагировать на клики и обновлять псевдоэлемент -->
+      <div id="progressContainer" style="position:relative; flex:1; display:flex; align-items:center;">
+        <div class="progress" id="progressBar" role="slider" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" tabindex="0"></div>
+        <div class="progress-handle" id="progressHandle" style="left:0%;"></div>
+      </div>
+
+      <div class="time" id="durationTime">0:00</div>
+    </div>
+
+    <a class="full-text-btn" id="fullText" href="lyrics.html" target="_blank" rel="noopener noreferrer">Full text</a>
+  </div>
+
+  <script>
+    // Элементы
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const progressBar = document.getElementById('progressBar');
+    const progressHandle = document.getElementById('progressHandle');
+    const currentTimeEl = document.getElementById('currentTime');
+    const durationTimeEl = document.getElementById('durationTime');
+
+    // Формат времени mm:ss / h:mm:ss если нужно
+    function formatTime(sec){
+      if (!isFinite(sec)) return '0:00';
+      sec = Math.floor(sec);
+      const h = Math.floor(sec/3600);
+      const m = Math.floor((sec%3600)/60);
+      const s = sec % 60;
+      return h>0 ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
+    }
+
+    // Загрузка метаданных (получаем длительность)
+    audio.addEventListener('loadedmetadata', () => {
+      durationTimeEl.textContent = formatTime(audio.duration);
+    });
+
+    // Обновление прогресса по времени воспроизведения
+    audio.addEventListener('timeupdate', () => {
+      updateProgressUI();
+      currentTimeEl.textContent = formatTime(audio.currentTime);
+    });
+
+    // Play/pause toggle
+    playBtn.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play().catch(e => console.warn('Playback error:', e));
+        playBtn.textContent = '⏸';
+        playBtn.setAttribute('aria-label','Pause');
+      } else {
+        audio.pause();
+        playBtn.textContent = '▶';
+        playBtn.setAttribute('aria-label','Play');
+      }
+    });
+
+    // Интерфейс прогресс-бара: клик/поиск
+    function setProgressByEvent(e){
+      const rect = progressBar.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      let pct = x / rect.width;
+      pct = Math.max(0, Math.min(1, pct));
+      audio.currentTime = pct * (isFinite(audio.duration) ? audio.duration : 0);
+      updateProgressUI();
+    }
+
+    // Обновляет визуал прогресса (ширина псевдоэлемента и позиция ручки)
+    function updateProgressUI(){
+      const pct = (audio.duration>0 && isFinite(audio.duration)) ? (audio.currentTime / audio.duration) * 100 : 0;
+      // Меняем ширину псевдоэлемента через CSS custom property: используем inline style для ::before невозможно, но можно изменить style.setProperty на элементе
+      progressBar.style.setProperty('--pct', pct + '%');
+      // Поскольку мы не можем напрямую изменить ::before width через JS, меняем его через element.style.backgroundImage trick:
+      progressBar.style.backgroundImage = `linear-gradient(90deg, var(--spotify-green) ${pct}%, rgba(255,255,255,0.12) ${pct}%)`;
+      // Или можно менять псевдоэлемент ширину — тут используем progressBar::before via setting attribute (we already simulate with background)
+      progressHandle.style.left = pct + '%';
+      progressBar.setAttribute('aria-valuenow', String(Math.round(pct)));
+    }
+
+    // Клик на прогресс
+    progressBar.addEventListener('click', setProgressByEvent);
+    // Поддержка drag (touch + mouse)
+    let seeking = false;
+    progressBar.addEventListener('mousedown', (e) => { seeking = true; setProgressByEvent(e); });
+    window.addEventListener('mousemove', (e) => { if(seeking) setProgressByEvent(e); });
+    window.addEventListener('mouseup', ()=> seeking=false);
+
+    progressBar.addEventListener('touchstart', (e)=> { seeking = true; setProgressByEvent(e); }, {passive:true});
+    window.addEventListener('touchmove', (e) => { if(seeking) setProgressByEvent(e); }, {passive:true});
+    window.addEventListener('touchend', ()=> seeking=false);
+
+    // Клавиши: пробел для play/pause, стрелки для перемотки
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') { e.preventDefault(); playBtn.click(); }
+      if (e.code === 'ArrowRight') { audio.currentTime = Math.min(audio.currentTime + 5, audio.duration || Infinity); }
+      if (e.code === 'ArrowLeft') { audio.currentTime = Math.max(audio.currentTime - 5, 0); }
+    });
+
+    // При завершении — меняем иконку
+    audio.addEventListener('ended', () => {
+      playBtn.textContent = '▶';
+      audio.currentTime = 0;
+      updateProgressUI();
+    });
+
+    // Инициализация UI (если метаданные уже подгрузились)
+    if (audio.readyState >= 1){
+      durationTimeEl.textContent = formatTime(audio.duration);
+      updateProgressUI();
+    }
+
+    // Небольшой initial tick на случай, если duration появится позже
+    setInterval(() => {
+      if (audio.duration && isFinite(audio.duration)) {
+        durationTimeEl.textContent = formatTime(audio.duration);
+        updateProgressUI();
+      }
+    }, 500);
+  </script>
+</body>
+</html>

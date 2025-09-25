@@ -1,0 +1,14 @@
+body {
+    background-image: url(hp-pic.png);
+    font: 5em "text", sans-serif;
+}
+
+button {
+    appearance: none;
+    border: none;
+    width: 100px;
+    height: 20px;
+    
+
+}
+
