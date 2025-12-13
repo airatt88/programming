@@ -1,0 +1,8 @@
+#root {
+  margin: 0;
+  /* text-align: center; */
+}
+
+header .advert {
+  background: url(../public/advert.jpg) cover no-repeat;
+}
