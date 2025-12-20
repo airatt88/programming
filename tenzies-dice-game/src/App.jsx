@@ -2,6 +2,7 @@ import React from 'react'
 import { nanoid } from "nanoid"
 import Die from "./Die.jsx"
 import Confetti from "react-confetti"
+import Snowfall from "react-snowfall"
 
 function App() {
   const [dice, setDice] = React.useState(() => generateNewDice())
@@ -11,7 +12,6 @@ function App() {
 
   const resetBtn = React.useRef(null)
   
-
   React.useEffect(() => {
     if (gameWon) {
       resetBtn.current.focus()
@@ -61,6 +61,7 @@ function App() {
 
   return (
     <main>
+      <Snowfall />
       {gameWon && <Confetti />}
       <div aria-live="polite" className="sr-only">
           {gameWon && <p>Congratulations! You won! Press "New Game" to start again.</p>}
